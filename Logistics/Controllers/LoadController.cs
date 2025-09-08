@@ -48,6 +48,20 @@ public class LoadController : ControllerBase
 
     }
 
+    [HttpPost("GetLoadDetailsForRoute")]
+    public Task<List<Load>> GetLoadDetailsForRoute(string[] loadIds)
+    {
+        try{
+            return _sqlHelperService.GetLoadDetailsForRoute(loadIds);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError($"Error in GetLoadDetailsForRoute: {ex.Message}");
+            return Task.FromResult<List<Load>>(null);
+        }
+
+    }
+
     [HttpPut("CreateLoadDetails")]
     public async Task<Result> CreateLoadDetails([FromBody] Load load)
     {

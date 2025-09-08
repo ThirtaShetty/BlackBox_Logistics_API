@@ -51,6 +51,21 @@ public class RouteController : ControllerBase
 
     }
 
+    [HttpGet("GetAllRoutes")]
+    public Task<List<LoadsRoute>> GetAllRoutes()
+    {
+        try
+        {
+            return _sqlHelperService.GetAllRoutes();
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError($"Error in GetRouteDetailsForStatus: {ex.Message}");
+            return Task.FromResult<List<LoadsRoute>>(null);
+        }
+
+    }
+
     [HttpPost("UpdateRouteStatus")]
     public async Task<Result> UpdateRouteStatus([FromBody] Dictionary<string, string> routeUpdate)
     {

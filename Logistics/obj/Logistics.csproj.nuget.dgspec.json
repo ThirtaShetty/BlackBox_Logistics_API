@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/Work/BLACKBOX/BlackBox_Logistics/Logistics/Logistics.csproj": {}
+    "/Users/Work/BLACKBOX/BlackBox_Logistics_API/Logistics/Logistics.csproj": {}
   },
   "projects": {
-    "/Users/Work/BLACKBOX/BlackBox_Logistics/Logistics/Logistics.csproj": {
+    "/Users/Work/BLACKBOX/BlackBox_Logistics_API/Logistics/Logistics.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/Work/BLACKBOX/BlackBox_Logistics/Logistics/Logistics.csproj",
+        "projectUniqueName": "/Users/Work/BLACKBOX/BlackBox_Logistics_API/Logistics/Logistics.csproj",
         "projectName": "Logistics",
-        "projectPath": "/Users/Work/BLACKBOX/BlackBox_Logistics/Logistics/Logistics.csproj",
+        "projectPath": "/Users/Work/BLACKBOX/BlackBox_Logistics_API/Logistics/Logistics.csproj",
         "packagesPath": "/Users/Work/.nuget/packages/",
-        "outputPath": "/Users/Work/BLACKBOX/BlackBox_Logistics/Logistics/obj/",
+        "outputPath": "/Users/Work/BLACKBOX/BlackBox_Logistics_API/Logistics/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/Work/.nuget/NuGet/NuGet.Config"

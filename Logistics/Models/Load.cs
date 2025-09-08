@@ -19,7 +19,7 @@ namespace Logistics.Models
         [MaxLength(1)]
         public string LoadType { get; set; } = null!;
 
-        [Column("load_weight", TypeName = "decimal(4,2)")]
+        [Column("load_weight", TypeName = "decimal(8,2)")]
         public decimal? LoadWeight { get; set; }
 
         [Column("load_status")]
@@ -127,6 +127,12 @@ namespace Logistics.Models
 
         [Column("load_actualDeliveryDate")]
         public DateTime? LoadActualDeliveryDate { get; set; }
+
+        [Column("load_pickupHubspotPincode")]
+        public int LoadPickupHubspotPincode { get; set; }
+
+         [Column("load_dropHubspotPincode")]
+        public int LoadDropHubspotPincode { get; set; }
 
         // Navigation properties (optional)
         // [ForeignKey("LoadPickupHubspot")]

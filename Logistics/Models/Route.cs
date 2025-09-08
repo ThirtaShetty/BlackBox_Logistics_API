@@ -11,7 +11,7 @@ namespace Logistics.Models
         [Column("route_id")]
         [Required]
         [StringLength(20)]
-        public string RouteId { get; set; } 
+        public string RouteId { get; set; }
 
         [Column("route_startDateTime")]
         [Required]
@@ -20,7 +20,7 @@ namespace Logistics.Models
         [Column("route_endDateTime")]
         public DateTime? RouteEndDateTime { get; set; }
 
-        [Column("route_totalWeight", TypeName = "decimal(4,2)")]
+        [Column("route_totalWeight", TypeName = "decimal(10,4)")]
         public decimal? RouteTotalWeight { get; set; }
 
         [Column("route_coordinatorName")]
@@ -31,7 +31,7 @@ namespace Logistics.Models
         [Column("route_coordinatorContactNo")]
         [Required]
         [StringLength(15)]
-        public string RouteCoordinatorContactNo { get; set; } 
+        public string RouteCoordinatorContactNo { get; set; }
 
         [Column("route_coordinatorId")]
         [Required]
@@ -57,7 +57,7 @@ namespace Logistics.Models
         [Column("route_startHubspot")]
         [Required]
         [StringLength(100)]
-        public string RouteStartHubspotPincode { get; set; }
+        public string RouteStartHubspot { get; set; }
 
         [Column("route_endHubspotPincode")]
         [Required]
@@ -75,10 +75,16 @@ namespace Logistics.Models
         [Column("route_loadIds")]
         public string? RouteLoadIds { get; set; } // Storing Load IDs as comma-separated string or JSON
 
+        [Column("route_pickupSpots")]
+        public string? RoutePickupSpots { get; set; } // Storing Load IDs as comma-separated string or JSON
+
+        [Column("route_dropSpots")]
+        public string? RouteDropSpots { get; set; } // Storing Load IDs as comma-separated string or JSON
+
         // // Navigation property (FK to Truck)
         // [ForeignKey("RouteTruckId")]
         // public virtual Truck? Truck { get; set; }
 
-        
+
     }
 }

@@ -9,14 +9,44 @@ namespace Logistics.Service;
 public class AssignmentHelperService: IAssignmentHelperService
 {
     private readonly ILogger<AssignmentHelperService> _logger;
+
+    private readonly SQLDbContext _context;
     private readonly IStatusHelperService _statusHelperService;
     private readonly ISQLHelperService _sqlHelperService;
 
-    public AssignmentHelperService(ILogger<AssignmentHelperService> logger, IStatusHelperService statusHelperService, ISQLHelperService sqlHelperService)
+    public AssignmentHelperService(ILogger<AssignmentHelperService> logger, IStatusHelperService statusHelperService, ISQLHelperService sqlHelperService, SQLDbContext context)
     {
         _sqlHelperService = sqlHelperService;
+        _context = context;
         _statusHelperService = statusHelperService;
         _logger = logger;
+    }
+    
+
+    public async Task<string> AssignHubspot(string pincode)
+    {
+        try
+        {
+            string pincodePrefix = pincode.ToString().Substring(0, 3);  // Considering first 3 digits of pincode to perform District level search.
+            List<Hubspot> hubspots = await _context.Hubspot.Where(t =>  t.HubspotPincode.ToString().StartsWith(pincodePrefix))
+            .OrderBy(t => Math.Abs(t.HubspotPincode - Convert.ToInt32(pincode)))
+            .ToListAsync();
+
+            if (hubspots.Count > 0)
+            {
+                return hubspots[0].HubspotName;
+            }
+            else
+            {
+                return "";
+            }      
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error in AssignHubspot: {ex.Message}");
+            return "";
+        }
     }
 
     public async Task<Result> AssignTruckForLocation(Dictionary<string, string> assignObject)
@@ -27,23 +57,23 @@ public class AssignmentHelperService: IAssignmentHelperService
             //List<Truck> availableTruckList = await _statusHelperService.GetTruckDetailsForStatus(Convert.ToInt32(assignObject["currentLocationPincode"]),"Available");
             List<Truck> availableTruckList = await _sqlHelperService.GetAvailableTrucksForPincode(currentPincode);
 
-            if(availableTruckList.Count != 0)
+            if (availableTruckList.Count != 0)
             {
-                var isTruckUpdated = new Result{ IsSuccess = false };
-                var isRouteUpdated = new Result{ IsSuccess = false };
+                var isTruckUpdated = new Result { IsSuccess = false };
+                var isRouteUpdated = new Result { IsSuccess = false };
                 Dictionary<string, string> truckUpdate = new Dictionary<string, string>();
                 truckUpdate["truckId"] = availableTruckList[0].TruckId;
                 truckUpdate["driverStatus"] = "In Transit";
                 truckUpdate["currentLocationPincode"] = assignObject["currentLocationPincode"];
                 isTruckUpdated = await _statusHelperService.UpdateTruckStatus(truckUpdate);
-                if(isTruckUpdated.IsSuccess)
+                if (isTruckUpdated.IsSuccess)
                 {
                     Dictionary<string, string> routeUpdate = new Dictionary<string, string>();
                     routeUpdate["routeId"] = assignObject["routeId"];
                     routeUpdate["routeStatus"] = "Initiated";
                     routeUpdate["routeTruckId"] = availableTruckList[0].TruckId;
                     isRouteUpdated = await _statusHelperService.UpdateRouteStatus(routeUpdate);
-                    if(isRouteUpdated.IsSuccess)
+                    if (isRouteUpdated.IsSuccess)
                     {
                         return new Result
                         {
@@ -62,9 +92,10 @@ public class AssignmentHelperService: IAssignmentHelperService
                     StatusCode = 500,
                     Exception = isTruckUpdated.Exception
                 };
-                
+
             }
-            else{
+            else
+            {
                 return new Result
                 {
                     IsSuccess = false,
@@ -73,7 +104,7 @@ public class AssignmentHelperService: IAssignmentHelperService
                 };
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError($"Error in AssignTruckForLocation: {ex.Message}");
             return new Result
@@ -104,8 +135,8 @@ public class AssignmentHelperService: IAssignmentHelperService
             else
             {
                 //Create a new route
-                Hubspot startHubspot = await _sqlHelperService.GetHubspotDetails(Convert.ToInt32(assignObject["loadPickupHubspot"]));
-                Hubspot endHubspot = await _sqlHelperService.GetHubspotDetails(Convert.ToInt32(assignObject["loadDropHubspot"]));
+                Hubspot startHubspot = await _sqlHelperService.GetHubspotDetails(Convert.ToInt32(assignObject["loadPickupHubspotPincode"]));
+                Hubspot endHubspot = await _sqlHelperService.GetHubspotDetails(Convert.ToInt32(assignObject["loadDropHubspotPincode"]));
 
                 var newRoute = new LoadsRoute
                 {

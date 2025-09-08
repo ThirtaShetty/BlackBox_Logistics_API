@@ -17,6 +17,21 @@ public class AssignmentController : ControllerBase
         _logger = logger;
     }
 
+    [HttpGet("AssignHubspot")]
+    public Task<string> AssignHubspot(string pincode)
+    {
+        try{
+            return _assignmentHelperService.AssignHubspot(pincode);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError($"Error in pincode: {ex.Message}");
+            return Task.FromResult("");
+        }
+
+    }
+
+
     [HttpPost("AssignTruckForLocation")]
     public async Task<Result> AssignTruckForLocation([FromBody] Dictionary<string, string> assignObject)
     {
@@ -55,14 +70,14 @@ public class AssignmentController : ControllerBase
     public async Task<Result> AssignLoadsToRoute([FromBody] Dictionary<string, string> assignObject)
     {
         try{
-            if (!assignObject.ContainsKey("loadId") || !assignObject.ContainsKey("loadPickupHubspot") || !assignObject.ContainsKey("loadDropHubspot") || !assignObject.ContainsKey("loadWeight") )
+            if (!assignObject.ContainsKey("loadId") || !assignObject.ContainsKey("loadPickupHubspotPincode") || !assignObject.ContainsKey("loadDropHubspotPincode") || !assignObject.ContainsKey("loadWeight") )
             {
                 return new Result
                 {
                     IsSuccess = false,
                     Message = "Load details are incorrect",
                     StatusCode = 500,
-                    Exception = "loadId, loadPickupHubspot, loadDropHubspot and loadWeight are required"
+                    Exception = "loadId, loadPickupHubspotPincode, loadDropHubspotPincode and loadWeight are required"
                 };
             }
             else

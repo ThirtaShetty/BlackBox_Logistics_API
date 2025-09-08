@@ -20,6 +20,12 @@ public class SQLHelperService: ISQLHelperService
     {
         return await _context.Load.FirstOrDefaultAsync(l => l.LoadId == loadId);
     }
+    
+    public async Task<List<Load>> GetLoadDetailsForRoute(string[] loadIds)
+    {
+        return await _context.Load.Where(u => loadIds.Contains(u.LoadId)).ToListAsync();
+;
+    }
 
     public async Task<Result> CreateLoadDetails(Load load)
     {
@@ -38,7 +44,7 @@ public class SQLHelperService: ISQLHelperService
         catch (Exception ex)
         {
             _logger.LogError($"Error in CreateLoadDetails: {ex.Message}");
-             result = new Result
+            result = new Result
             {
                 IsSuccess = false,
                 Message = "Load details creation failed",
@@ -127,26 +133,37 @@ public class SQLHelperService: ISQLHelperService
 
     public async Task<LoadsRoute> GetRouteDetails(string routeId)
     {
-        return await _context.LoadsRoute.FirstOrDefaultAsync(l => l.RouteId == routeId);
+        LoadsRoute route = await _context.LoadsRoute.FirstOrDefaultAsync(l => l.RouteId == routeId);
+        string[] routeLoadIds = route.RouteLoadIds?.Split(',') ?? Array.Empty<string>();
+        List<Load> loads = await GetLoadDetailsForRoute(routeLoadIds);
+        route.RoutePickupSpots = string.Join(", ", loads.Select(l => l.LoadPickupHubspot).Where(h => !string.IsNullOrEmpty(h)).Distinct());
+        route.RouteDropSpots = string.Join(", ", loads.Select(l => l.LoadDropHubspot).Where(h => !string.IsNullOrEmpty(h)).Distinct());
+        return route;
+
+    }
+    public async Task<List<LoadsRoute>> GetAllRoutes()
+    {
+        List<LoadsRoute> routes = await _context.LoadsRoute.Where(l => l.RouteStatus.ToLower() != "completed").ToListAsync();
+        return routes ;
     }
 
     public async Task<List<LoadsRoute>> GetExistingRouteDetails(Dictionary<string, string> assignObject)
     {
         decimal newLoadWeight = Convert.ToDecimal(assignObject["loadWeight"]);
-        int pickupPincode = Convert.ToInt32(assignObject["loadPickupHubspot"]);
-        int dropPincode = Convert.ToInt32(assignObject["loadDropHubspot"]);
+        int pickupPincode = Convert.ToInt32(assignObject["loadPickupHubspotPincode"]);
+        int dropPincode = Convert.ToInt32(assignObject["loadDropHubspotPincode"]);
 
-        string startPincodePrefix = assignObject["loadPickupHubspot"].ToString().Substring(0, 4);  // Considering first 4 digits of pincode to perform District+ Nearby Posts level search.
-        string endPincodePrefix = assignObject["loadDropHubspot"].ToString().Substring(0, 4);  // Considering first 4 digits of pincode to perform District+ Nearby Posts level search.
+        string startPincodePrefix = assignObject["loadPickupHubspotPincode"].ToString().Substring(0, 4);  // Considering first 4 digits of pincode to perform District+ Nearby Posts level search.
+        string endPincodePrefix = assignObject["loadDropHubspotPincode"].ToString().Substring(0, 4);  // Considering first 4 digits of pincode to perform District+ Nearby Posts level search.
         var maxCapacity = 900; //in kgs
-        
+
         List<LoadsRoute> existingRoutes = await _context.LoadsRoute
         .Where(r => r.RouteStatus == "Created" && (r.RouteTotalWeight + newLoadWeight) <= maxCapacity) // Filter first on weight and status
         .Select(r => new
         {
             Route = r,
             PickupDistance = Math.Abs(r.RouteStartHubspotPincode - pickupPincode),
-            DropDistance   = Math.Abs(r.RouteEndHubspotPincode - dropPincode)
+            DropDistance = Math.Abs(r.RouteEndHubspotPincode - dropPincode)
         })
         .Select(x => new
         {
