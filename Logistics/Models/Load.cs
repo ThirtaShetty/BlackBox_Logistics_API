@@ -16,7 +16,7 @@ namespace Logistics.Models
         public DateTime LoadRegDateTime { get; set; }
 
         [Column("load_type")]
-        [MaxLength(1)]
+        [MaxLength(10)]
         public string LoadType { get; set; } = null!;
 
         [Column("load_weight", TypeName = "decimal(8,2)")]
